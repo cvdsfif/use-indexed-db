@@ -10,20 +10,17 @@
             "DOM",
             "DOM.Iterable"
         ],
-        "module": "ESNext",
+        "module": "ES2020",
         "skipLibCheck": true,
         /* Bundler mode */
         "moduleResolution": "bundler",
         "resolveJsonModule": true,
-        "isolatedModules": true,
-        "moduleDetection": "force",
         "jsx": "react-jsx",
         /* Linting */
         "strict": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
-        "allowSyntheticDefaultImports": true,
         "paths": {
             "@/*": [
                 "./*"
