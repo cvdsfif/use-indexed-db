@@ -14,11 +14,9 @@
         "skipLibCheck": true,
         /* Bundler mode */
         "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
         "resolveJsonModule": true,
         "isolatedModules": true,
         "moduleDetection": "force",
-        "noEmit": true,
         "jsx": "react-jsx",
         /* Linting */
         "strict": true,
@@ -26,11 +24,11 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
         "allowSyntheticDefaultImports": true,
-    },
-    "paths": {
-        "@/*": [
-            "./*"
-        ]
+        "paths": {
+            "@/*": [
+                "./*"
+            ]
+        }
     },
     "include": [
         "src",
