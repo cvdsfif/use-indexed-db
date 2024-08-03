@@ -29,7 +29,6 @@
     },
     "include": [
         "src",
-        "tests",
-        "test-assets"
+        "tests"
     ]
 }

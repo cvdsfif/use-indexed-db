@@ -1,5 +1,5 @@
 {
-  "name": "use-indexed-db",
+  "name": "use-indexed-db-state",
   "version": "0.0.1-beta.0",
   "description": "React hook persisting the state between sessions",
   "main": "index.js",

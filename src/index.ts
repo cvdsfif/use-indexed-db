@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react"
 export const LOCAL_DB_NAME = "defaultLocalDb"
 export const LOCAL_STORE_NAME = "defaultStore"
 
-export const useIndexedDb = <T>(
+export const useIndexedDbState = <T>(
     key: string,
     defaultValue: T,
     {

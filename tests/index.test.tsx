@@ -1,7 +1,7 @@
 import { render, waitFor } from "@testing-library/react"
 import "@testing-library/jest-dom"
 
-describe("Testing the useIndexedDb hook", () => {
+describe("Testing the useIndexedDbState hook", () => {
     let TestComponent: React.FC
     let upgradeHandler: any
 
@@ -56,7 +56,7 @@ describe("Testing the useIndexedDb hook", () => {
 
         TestComponent = () => {
             const [counter, setCounter, counterLoaded, deleteCounter] =
-                hookImport.useIndexedDb(
+                hookImport.useIndexedDbState(
                     COUNTER_KEY,
                     0,
                     defaultNames
