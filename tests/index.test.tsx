@@ -18,6 +18,8 @@ describe("Testing the useIndexedDbState hook", () => {
     let defaultDbName: string
     let defaultStoreName: string
 
+    let loadStoredDataImported = async (_: string, _1?: { localDbName: string, storeName: string }) => Promise<any>
+
     const initAllImplementations = () => {
         openDBMock.mockImplementation(async (_, _1, options) => {
             upgradeHandler = options.upgrade
@@ -53,6 +55,7 @@ describe("Testing the useIndexedDbState hook", () => {
         const hookImport = await import("../src/index")
         defaultDbName = hookImport.LOCAL_DB_NAME
         defaultStoreName = hookImport.LOCAL_STORE_NAME
+        loadStoredDataImported = hookImport.loadStoredData
 
         TestComponent = () => {
             const [counter, setCounter, counterLoaded, deleteCounter] =
@@ -178,6 +181,36 @@ describe("Testing the useIndexedDbState hook", () => {
         // WHEN the component is rendered
         render(<TestComponent />)
         upgradeHandler(dbStub)
+
+        // // AND the database with a different name is opened
+        expect(openDBMock).toHaveBeenCalledWith("testDb", 1, expect.anything())
+
+        // AND the store with a different name is created
+        expect(createObjectStoreMock).toHaveBeenCalledWith("testStore")
+    })
+
+    test("Should load value from indexed db with an external loader", async () => {
+        // GIVEN a value can be retrieved from the DB
+        dbGetMock.mockReturnValue(2)
+
+        // WHEN loading the value directly from the loader
+        const loaded = await loadStoredDataImported(COUNTER_KEY)
+        upgradeHandler(dbStub)
+
+        // THEN the counter is set to the loaded value
+        expect(loaded).toBe(2)
+    })
+
+    test("Should load value from indexed db with an external loader using a different database and store", async () => {
+        // GIVEN a value can be retrieved from the DB
+        dbGetMock.mockReturnValue(2)
+
+        // WHEN loading the value directly from the loader
+        const loaded = await loadStoredDataImported(COUNTER_KEY, { localDbName: "testDb", storeName: "testStore" })
+        upgradeHandler(dbStub)
+
+        // THEN the counter is set to the loaded value
+        expect(loaded).toBe(2)
 
         // // AND the database with a different name is opened
         expect(openDBMock).toHaveBeenCalledWith("testDb", 1, expect.anything())

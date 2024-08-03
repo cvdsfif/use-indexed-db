@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react"
 export const LOCAL_DB_NAME = "defaultLocalDb"
 export const LOCAL_STORE_NAME = "defaultStore"
 
-const connectDb = (localDbName = LOCAL_DB_NAME, storeName = LOCAL_STORE_NAME) => await openDB(localDbName, 1, {
+const connectDb = async (localDbName: string, storeName: string) => await openDB(localDbName, 1, {
     upgrade(db) {
         if (!db.objectStoreNames.contains(storeName)) {
             db.createObjectStore(storeName)
