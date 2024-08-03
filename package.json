@@ -1,6 +1,6 @@
 {
   "name": "use-indexed-db-state",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.1",
   "description": "React hook persisting the state between sessions",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -9,7 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist && node build.js && tsc --emitDeclarationOnly",
+    "build": "rm -rf dist && node build.js && tsc --emitDeclarationOnly --project tsconfig.node.json",
     "test": "tsc --build --clean && jest $npm_config_dir && $(yarn bin)/coverage-badges"
   },
   "keywords": [
