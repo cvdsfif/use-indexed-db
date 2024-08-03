@@ -1,6 +1,6 @@
 {
   "name": "use-indexed-db-state",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "description": "React hook persisting the state between sessions",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
