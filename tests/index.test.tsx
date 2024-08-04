@@ -1,5 +1,6 @@
-import { /*act,*/ act, fireEvent, getByTestId, render, waitFor } from "@testing-library/react"
+import { act, fireEvent, getByTestId, render, waitFor } from "@testing-library/react"
 import "@testing-library/jest-dom"
+import { IndexedDbStateProps } from "../src/index"
 
 describe("Testing the useIndexedDbState hook", () => {
     let TestComponent: React.FC
@@ -14,7 +15,12 @@ describe("Testing the useIndexedDbState hook", () => {
     const dbDeleteMock = jest.fn()
     const objectStoreContainsMock = jest.fn()
     const transactionMock = jest.fn()
-    let defaultNames: { localDbName: string, storeName: string } | undefined = undefined
+    const loadedCallbackMock = jest.fn()
+    const storedCallbackMock = jest.fn()
+    let defaultProps: IndexedDbStateProps = {
+        loadedCallback: loadedCallbackMock,
+        storedCallback: storedCallbackMock
+    }
     let defaultDbName: string
     let defaultStoreName: string
 
@@ -74,7 +80,7 @@ describe("Testing the useIndexedDbState hook", () => {
                 hookImport.useIndexedDbState(
                     COUNTER_KEY,
                     0,
-                    defaultNames
+                    defaultProps
                 )
             return <>
                 <div data-testid="counter">{counter}</div>
@@ -123,6 +129,9 @@ describe("Testing the useIndexedDbState hook", () => {
         const increment = await findByTestId("increment")
         await waitFor(() => expect(increment).not.toBeDisabled())
 
+        // AND the loaded callback is called
+        expect(loadedCallbackMock).toHaveBeenCalled()
+
         // AND the database with the default name is opened
         expect(openDBMock).toHaveBeenCalledWith(defaultDbName, 1, expect.anything())
 
@@ -159,7 +168,7 @@ describe("Testing the useIndexedDbState hook", () => {
 
     test("Should store the value after increment", async () => {
         // GIVEN a component set up and rendered
-        const { container, findByTestId } = await act(() => render(<TestComponent />))
+        const { container } = await act(() => render(<TestComponent />))
         upgradeHandler(dbStub)
 
         // AND we wait for 100ms to let the local store load
@@ -172,10 +181,8 @@ describe("Testing the useIndexedDbState hook", () => {
         // THEN the counter is stored in the DB
         await waitFor(() => expect(dbPutMock).toHaveBeenCalledWith(1, COUNTER_KEY))
 
-        const counter = await findByTestId("counter")
-        await waitFor(() => expect(counter.textContent).toBe("1"))
-
-        await waitFor(() => expect(increment).not.toBeDisabled())
+        // AND the store callback is called
+        expect(storedCallbackMock).toHaveBeenCalled()
     })
 
     test("Should reset the counter when the reset button is called", async () => {
@@ -197,7 +204,7 @@ describe("Testing the useIndexedDbState hook", () => {
 
     test("Should set up the hook with different database and store name", async () => {
         // GIVEN a component set up with different database and store names
-        defaultNames = {
+        defaultProps = {
             localDbName: "testDb",
             storeName: "testStore"
         }

@@ -22,38 +22,46 @@ export const loadStoredData = async (
     return data
 }
 
+export type IndexedDbStateProps = {
+    localDbName?: string,
+    storeName?: string,
+    loadedCallback?: () => void,
+    storedCallback?: () => void
+}
+
 export const useIndexedDbState = <T>(
     key: string,
     defaultValue: T,
-    {
-        localDbName,
-        storeName
-    } = {
-            localDbName: LOCAL_DB_NAME,
-            storeName: LOCAL_STORE_NAME
-        }
+    props?: IndexedDbStateProps
 ): [T, Dispatch<SetStateAction<T>>, boolean, () => Promise<void>] => {
+    const localDbNameValue = props?.localDbName ?? LOCAL_DB_NAME
+    const storeNameValue = props?.storeName ?? LOCAL_STORE_NAME
+
     const [value, setValue] = useState(defaultValue)
     const [loaded, setLoaded] = useState(false)
 
-    const connectLocalDb = async () => await connectDb(localDbName, storeName)
+    const connectLocalDb = async () => await connectDb(localDbNameValue, storeNameValue)
 
-    const getStoredUserData = async () => await loadStoredData(key, { localDbName, storeName })
+    const getStoredUserData = async () => await loadStoredData(key, {
+        localDbName: localDbNameValue,
+        storeName: storeNameValue
+    })
 
     const setStoredUserData = async (data: T) => {
         const db = await connectLocalDb()
-        const tx = db.transaction(storeName, "readwrite")
-        const store = tx.objectStore(storeName)
+        const tx = db.transaction(storeNameValue, "readwrite")
+        const store = tx.objectStore(storeNameValue)
         await Promise.allSettled([
             store.put(data, key),
             tx.done
         ])
+        props?.storedCallback?.()
     }
 
     const deleteStoredUserData = async () => {
         const db = await connectLocalDb()
-        const tx = db.transaction(storeName, "readwrite")
-        const store = tx.objectStore(storeName)
+        const tx = db.transaction(storeNameValue, "readwrite")
+        const store = tx.objectStore(storeNameValue)
         await Promise.allSettled([
             store.delete(key),
             tx.done
@@ -70,7 +78,10 @@ export const useIndexedDbState = <T>(
             if (data) {
                 setValue(data)
             }
-            if (!loaded) setLoaded(true)
+            if (!loaded) {
+                setLoaded(true)
+                props?.loadedCallback?.()
+            }
         })
     }, [])
 
