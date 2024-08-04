@@ -64,7 +64,7 @@ export const useIndexedDbState = <T>(
         ])
         console.log("Stored", data)
         props?.storedCallback?.()
-        console.log("Past-callback", props?.storedCallback)
+        setStoredValue(data)
     }
 
     const deleteStoredUserData = async () => {
