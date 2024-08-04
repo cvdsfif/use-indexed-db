@@ -1,4 +1,4 @@
-import { render, waitFor } from "@testing-library/react"
+import { /*act,*/ act, fireEvent, getByTestId, render, waitFor } from "@testing-library/react"
 import "@testing-library/jest-dom"
 
 describe("Testing the useIndexedDbState hook", () => {
@@ -49,13 +49,25 @@ describe("Testing the useIndexedDbState hook", () => {
             })
         )
 
-        initAllImplementations()
-
         // We can only import the tested module once the mock for idb is set up
         const hookImport = await import("../src/index")
         defaultDbName = hookImport.LOCAL_DB_NAME
         defaultStoreName = hookImport.LOCAL_STORE_NAME
         loadStoredDataImported = hookImport.loadStoredData
+
+        const ButtonMock = ({
+            onClick, dataTestid, disabled, children
+        }: {
+            onClick: () => void,
+            dataTestid: string,
+            disabled: boolean,
+            children: any
+        }) => (<span
+            onClick={onClick}
+            data-testid={dataTestid}
+            aria-disabled={disabled}
+        >{children}</span>
+        )
 
         TestComponent = () => {
             const [counter, setCounter, counterLoaded, deleteCounter] =
@@ -66,20 +78,24 @@ describe("Testing the useIndexedDbState hook", () => {
                 )
             return <>
                 <div data-testid="counter">{counter}</div>
-                <button
-                    data-testid="increment"
-                    onClick={() => setCounter(counter + 1)}
+                <ButtonMock
+                    dataTestid="increment"
+                    onClick={
+                        () => {
+                            setCounter(counter => counter + 1)
+                        }
+                    }
                     disabled={!counterLoaded}
-                >Increment</button>
-                <button
-                    data-testid="resetButton"
+                >Increment</ButtonMock>
+                <ButtonMock
+                    dataTestid="resetButton"
                     onClick={
                         () => {
                             deleteCounter()
                         }
                     }
                     disabled={!counterLoaded}
-                >Reset</button>
+                >Reset</ButtonMock>
             </>
         }
     })
@@ -105,7 +121,7 @@ describe("Testing the useIndexedDbState hook", () => {
 
         // AND the increment button is enabled after loading
         const increment = await findByTestId("increment")
-        waitFor(() => expect(increment).not.toBeDisabled())
+        await waitFor(() => expect(increment).not.toBeDisabled())
 
         // AND the database with the default name is opened
         expect(openDBMock).toHaveBeenCalledWith(defaultDbName, 1, expect.anything())
@@ -116,16 +132,16 @@ describe("Testing the useIndexedDbState hook", () => {
 
     test("Should increment value when button is clicked", async () => {
         // GIVEN a component set up and rendered
-        const { findByTestId } = render(<TestComponent />)
+        const { container } = render(<TestComponent />)
         upgradeHandler(dbStub)
 
         // WHEN the increment button is clicked
-        const increment = await findByTestId("increment")
-        increment.click()
+        const increment = await getByTestId(container, "increment")
+        fireEvent.click(increment)
 
         // THEN the counter is incremented
-        const counter = await findByTestId("counter")
-        waitFor(() => expect(counter.textContent).toBe("1"))
+        const counter = await getByTestId(container, "counter")
+        await waitFor(() => expect(counter.textContent).toBe("1"))
     })
 
     test("Should load value from indexed db", async () => {
@@ -138,20 +154,28 @@ describe("Testing the useIndexedDbState hook", () => {
 
         // THEN the counter is set to the loaded value
         const counter = await findByTestId("counter")
-        waitFor(() => expect(counter.textContent).toBe("2"))
+        await waitFor(() => expect(counter.textContent).toBe("2"))
     })
 
-    test("Should store the value after the increment", async () => {
+    test("Should store the value after increment", async () => {
         // GIVEN a component set up and rendered
-        const { findByTestId } = render(<TestComponent />)
+        const { container, findByTestId } = await act(() => render(<TestComponent />))
         upgradeHandler(dbStub)
 
+        // AND we wait for 100ms to let the local store load
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
         // WHEN the increment button is clicked
-        const increment = await findByTestId("increment")
-        increment.click()
+        const increment = await getByTestId(container, "increment")
+        fireEvent.click(increment)
 
         // THEN the counter is stored in the DB
-        waitFor(() => expect(dbPutMock).toHaveBeenCalledWith(1, COUNTER_KEY))
+        await waitFor(() => expect(dbPutMock).toHaveBeenCalledWith(1, COUNTER_KEY))
+
+        const counter = await findByTestId("counter")
+        await waitFor(() => expect(counter.textContent).toBe("1"))
+
+        await waitFor(() => expect(increment).not.toBeDisabled())
     })
 
     test("Should reset the counter when the reset button is called", async () => {
@@ -164,11 +188,11 @@ describe("Testing the useIndexedDbState hook", () => {
         reset.click()
 
         // THEN the counter is removed from the DB
-        waitFor(() => expect(dbDeleteMock).toHaveBeenCalledWith(COUNTER_KEY))
+        await waitFor(() => expect(dbDeleteMock).toHaveBeenCalledWith(COUNTER_KEY))
 
         // AND the counter is reset to the initial value
         const counter = await findByTestId("counter")
-        waitFor(() => expect(counter.textContent).toBe("0"))
+        await waitFor(() => expect(counter.textContent).toBe("0"))
     })
 
     test("Should set up the hook with different database and store name", async () => {
@@ -179,7 +203,7 @@ describe("Testing the useIndexedDbState hook", () => {
         }
 
         // WHEN the component is rendered
-        render(<TestComponent />)
+        await act(() => render(<TestComponent />))
         upgradeHandler(dbStub)
 
         // // AND the database with a different name is opened
