@@ -17,10 +17,7 @@ describe("Testing the useIndexedDbState hook", () => {
     const transactionMock = jest.fn()
     const loadedCallbackMock = jest.fn()
     const storedCallbackMock = jest.fn()
-    let defaultProps: IndexedDbStateProps = {
-        loadedCallback: loadedCallbackMock,
-        storedCallback: storedCallbackMock
-    }
+    let defaultProps: IndexedDbStateProps
     let defaultDbName: string
     let defaultStoreName: string
 
@@ -39,6 +36,10 @@ describe("Testing the useIndexedDbState hook", () => {
             })),
             done: Promise.resolve("")
         }))
+        defaultProps = {
+            loadedCallback: loadedCallbackMock,
+            storedCallback: storedCallbackMock
+        }
     }
 
     const dbStub = {

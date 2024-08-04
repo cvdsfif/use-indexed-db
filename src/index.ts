@@ -38,16 +38,22 @@ export const useIndexedDbState = <T>(
     const storeNameValue = props?.storeName ?? LOCAL_STORE_NAME
 
     const [value, setValue] = useState(defaultValue)
+    const [storedValue, setStoredValue] = useState<T | undefined>(undefined)
     const [loaded, setLoaded] = useState(false)
 
     const connectLocalDb = async () => await connectDb(localDbNameValue, storeNameValue)
 
-    const getStoredUserData = async () => await loadStoredData(key, {
-        localDbName: localDbNameValue,
-        storeName: storeNameValue
-    })
+    const getStoredUserData = async () => {
+        const lastStoredValue = await loadStoredData(key, {
+            localDbName: localDbNameValue,
+            storeName: storeNameValue
+        })
+        setStoredValue(lastStoredValue)
+        return lastStoredValue
+    }
 
     const setStoredUserData = async (data: T) => {
+        if (storedValue === data) return
         const db = await connectLocalDb()
         const tx = db.transaction(storeNameValue, "readwrite")
         const store = tx.objectStore(storeNameValue)
@@ -66,6 +72,7 @@ export const useIndexedDbState = <T>(
             store.delete(key),
             tx.done
         ])
+        setStoredValue(undefined)
         setValue(defaultValue)
     }
 
