@@ -53,6 +53,7 @@ export const useIndexedDbState = <T>(
     }
 
     const setStoredUserData = async (data: T) => {
+        console.log("Storing", data, storedValue)
         if (storedValue === data) return
         const db = await connectLocalDb()
         const tx = db.transaction(storeNameValue, "readwrite")
@@ -61,7 +62,9 @@ export const useIndexedDbState = <T>(
             store.put(data, key),
             tx.done
         ])
+        console.log("Stored", data)
         props?.storedCallback?.()
+        console.log("Past-callback", props?.storedCallback)
     }
 
     const deleteStoredUserData = async () => {
