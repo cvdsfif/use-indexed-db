@@ -60,7 +60,7 @@ describe("Testing the useIndexedDbState hook", () => {
         const hookImport = await import("../src/index")
         defaultDbName = hookImport.LOCAL_DB_NAME
         defaultStoreName = hookImport.LOCAL_STORE_NAME
-        loadStoredDataImported = hookImport.loadStoredData
+        loadStoredDataImported = hookImport.loadStoredData as any
 
         const ButtonMock = ({
             onClick, dataTestid, disabled, children
