@@ -40,7 +40,7 @@ export const loadStoredData = async <T>(
  * @param data Data object to store
  * @param param2 Optional properties object allowing to specify the local database name as `localDbName` and the store as `storeName`
  */
-export const saveStoredUserData = async <T>(
+export const saveStoredData = async <T>(
     key: string,
     data: T,
     { localDbName, storeName } = { localDbName: LOCAL_DB_NAME, storeName: LOCAL_STORE_NAME }
@@ -102,13 +102,13 @@ export const useIndexedDbState = <T>(
             localDbName: localDbNameValue,
             storeName: storeNameValue
         })
-        setStoredValue(lastStoredValue)
+        setStoredValue(lastStoredValue as any)
         return lastStoredValue
     }
 
     const setStoredUserData = async (data: T) => {
         if (storedValue === data) return
-        await saveStoredUserData(key, data, { localDbName: localDbNameValue, storeName: storeNameValue })
+        await saveStoredData(key, data, { localDbName: localDbNameValue, storeName: storeNameValue })
         props?.storedCallback?.()
         setStoredValue(data)
     }
@@ -132,7 +132,7 @@ export const useIndexedDbState = <T>(
     useEffect(() => {
         getStoredUserData().then(data => {
             if (data) {
-                setValue(data)
+                setValue(data as any)
             }
             if (!loaded) {
                 setLoaded(true)

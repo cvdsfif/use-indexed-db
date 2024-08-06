@@ -1,6 +1,5 @@
 import { act, fireEvent, getByTestId, render, waitFor } from "@testing-library/react"
 import "@testing-library/jest-dom"
-import { IndexedDbStateProps } from "../src/index"
 
 describe("Testing the useIndexedDbState hook", () => {
     let TestComponent: React.FC
@@ -17,11 +16,12 @@ describe("Testing the useIndexedDbState hook", () => {
     const transactionMock = jest.fn()
     const loadedCallbackMock = jest.fn()
     const storedCallbackMock = jest.fn()
-    let defaultProps: IndexedDbStateProps
+    let defaultProps: any
     let defaultDbName: string
     let defaultStoreName: string
 
     let loadStoredDataImported = async (_: string, _1?: { localDbName: string, storeName: string }) => Promise<any>
+    let saveStoredDataImported = async (_: string, _1: any, _2?: { localDbName: string, storeName: string }) => Promise<any>
 
     const initAllImplementations = () => {
         openDBMock.mockImplementation(async (_, _1, options) => {
@@ -61,6 +61,7 @@ describe("Testing the useIndexedDbState hook", () => {
         defaultDbName = hookImport.LOCAL_DB_NAME
         defaultStoreName = hookImport.LOCAL_STORE_NAME
         loadStoredDataImported = hookImport.loadStoredData as any
+        saveStoredDataImported = hookImport.saveStoredData as any
 
         const ButtonMock = ({
             onClick, dataTestid, disabled, children
@@ -249,5 +250,16 @@ describe("Testing the useIndexedDbState hook", () => {
 
         // AND the store with a different name is created
         expect(createObjectStoreMock).toHaveBeenCalledWith("testStore")
+    })
+
+    test("Should store value to indexed db with an external storage function", async () => {
+        // GIVEN the system is initialized
+
+        // WHEN loading the value directly from the loader
+        await saveStoredDataImported(COUNTER_KEY, 2)
+        upgradeHandler(dbStub)
+
+        // THEN the data is effectively stored
+        expect(dbPutMock).toHaveBeenCalledWith(2, COUNTER_KEY)
     })
 })
