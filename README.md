@@ -1,5 +1,7 @@
 # React hook persisting the state between sessions
 
+![Coverage](./badges/coverage.svg) [![npm version](https://badge.fury.io/js/use-indexed-db-state.svg)](https://badge.fury.io/js/![typizator](https://badge.fury.io/js/use-indexed-db-state.svg)) [![Node version](https://img.shields.io/node/v/use-indexed-db-state.svg?style=flat)](https://nodejs.org/)
+
 ## Purpose
 
 This hook is similar to `useState` except that it persists the data locally using the IndexedDb built-in browsers' database.
